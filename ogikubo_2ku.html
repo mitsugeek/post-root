@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>荻窪局 2区 取集ルート</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/ogikubo-routes.js"></script>
+  <style>
+    :root {
+      color-scheme: light;
+      --ink: #1e293b;
+      --muted: #64748b;
+      --panel: #ffffff;
+      --line: #2563eb;
+      --accent: #dc2626;
+      --border: #d8dee8;
+      --soft: #f8fafc;
+    }
+    * { box-sizing: border-box; }
+    html, body { height: 100%; margin: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; color: var(--ink); }
+    body { display: grid; grid-template-rows: auto 1fr; background: #eef2f7; }
+    header {
+      display: flex; align-items: center; gap: 12px; flex-wrap: wrap;
+      padding: 10px 12px; background: var(--panel); border-bottom: 1px solid var(--border); z-index: 10;
+    }
+    h1 { font-size: 18px; line-height: 1.2; margin: 0 8px 0 0; white-space: nowrap; }
+    nav { display: flex; gap: 6px; }
+    nav a {
+      display: inline-flex; align-items: center; justify-content: center; min-width: 44px; height: 34px;
+      padding: 0 10px; border: 1px solid var(--border); border-radius: 6px; color: var(--ink); text-decoration: none; font-weight: 700;
+    }
+    nav a[aria-current="page"] { background: var(--ink); color: white; border-color: var(--ink); }
+    .route-controls { display: flex; gap: 6px; flex-wrap: wrap; }
+    .route-controls button {
+      height: 34px; border: 1px solid var(--border); border-radius: 6px; background: white; color: var(--ink);
+      padding: 0 12px; font-weight: 700; cursor: pointer;
+    }
+    .route-controls button.active { background: var(--accent); border-color: var(--accent); color: white; }
+    .meta { margin-left: auto; font-size: 13px; color: var(--muted); }
+    main { position: relative; min-height: 0; }
+    #map { position: absolute; inset: 0; }
+    .badge {
+      display: flex; align-items: center; justify-content: center; width: 30px; height: 30px;
+      border-radius: 50%; border: 2px solid #111827; background: white; color: #111827;
+      font-size: 13px; font-weight: 800; box-shadow: 0 2px 8px rgba(15, 23, 42, .28);
+    }
+    .popup h2 { margin: 0 0 6px; font-size: 15px; }
+    .popup p { margin: 3px 0; font-size: 13px; }
+    .popup .links { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .popup a { display: inline-flex; align-items: center; min-height: 30px; padding: 0 8px; border-radius: 6px; background: var(--soft); color: #0f172a; text-decoration: none; border: 1px solid var(--border); }
+    @media (max-width: 720px) {
+      body { grid-template-rows: auto 1fr; }
+      header { align-items: stretch; }
+      h1 { width: 100%; font-size: 16px; }
+      .meta { width: 100%; margin-left: 0; }
+      nav a, .route-controls button { height: 32px; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>荻窪局 2区</h1>
+    <nav aria-label="区切替">
+      <a href="ogikubo_2ku.html" aria-current="page">2区</a>
+      <a href="ogikubo_3ku.html" >3区</a>
+      <a href="ogikubo_4ku.html" >4区</a>
+    </nav>
+    <div class="route-controls" id="routeControls" aria-label="ルート切替"></div>
+    <div class="meta" id="routeMeta"></div>
+  </header>
+  <main><div id="map"></div></main>
+  <script>
+    const DISTRICT_ID = "2";
+    const district = window.OGIKUBO_ROUTES.districts[DISTRICT_ID];
+    const map = L.map('map', { zoomControl: true });
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      maxZoom: 19,
+      attribution: '&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+    }).addTo(map);
+
+    let layerGroup = L.layerGroup().addTo(map);
+    const controls = document.getElementById('routeControls');
+    const meta = document.getElementById('routeMeta');
+
+    function mapsUrl(point) {
+      return `https://www.google.com/maps/search/?api=1&query=${point.lat},${point.lng}`;
+    }
+    function streetViewUrl(point) {
+      return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${point.lat},${point.lng}`;
+    }
+    function postmapUrl(point) {
+      return point.source && point.source.id ? `https://www.postmap.org/map/${point.source.id}` : '';
+    }
+    function icon(order) {
+      return L.divIcon({
+        className: 'route-badge-icon',
+        html: `<div class="badge">${order}</div>`,
+        iconSize: [30, 30],
+        iconAnchor: [15, 15],
+        popupAnchor: [0, -16]
+      });
+    }
+    function popup(point) {
+      const postmap = postmapUrl(point);
+      const name = point.name ? `<h2>${escapeHtml(point.name)}</h2>` : `<h2>${escapeHtml(point.address)}</h2>`;
+      const postmapLink = postmap ? `<a href="${postmap}" target="_blank" rel="noopener">postmap</a>` : '';
+      return `<div class="popup">
+        ${name}
+        <p>${point.order}. ${escapeHtml(point.address)} / ${escapeHtml(point.boxType)}</p>
+        <p>${escapeHtml(point.source.label)}</p>
+        <div class="links">
+          <a href="${mapsUrl(point)}" target="_blank" rel="noopener">Google Maps</a>
+          <a href="${streetViewUrl(point)}" target="_blank" rel="noopener">Street View</a>
+          ${postmapLink}
+        </div>
+      </div>`;
+    }
+    function escapeHtml(value) {
+      return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
+    }
+    function draw(routeId) {
+      const route = district.routes.find(item => item.id === routeId) || district.routes[0];
+      layerGroup.clearLayers();
+      const latlngs = route.points.map(point => [point.lat, point.lng]);
+      L.polyline(latlngs, { color: '#2563eb', weight: 4, opacity: 0.78 }).addTo(layerGroup);
+      route.points.forEach(point => {
+        L.marker([point.lat, point.lng], { icon: icon(point.order) }).bindPopup(popup(point), { maxWidth: 320 }).addTo(layerGroup);
+      });
+      map.fitBounds(latlngs, { padding: [30, 30] });
+      meta.textContent = `${route.label} / ${route.points.length}地点 / PDF p.${route.pdfPage}`;
+      [...controls.querySelectorAll('button')].forEach(button => button.classList.toggle('active', button.dataset.route === route.id));
+    }
+    district.routes.forEach((route, index) => {
+      const button = document.createElement('button');
+      button.type = 'button';
+      button.dataset.route = route.id;
+      button.textContent = route.label;
+      button.addEventListener('click', () => draw(route.id));
+      controls.appendChild(button);
+      if (index === 0) button.classList.add('active');
+    });
+    draw(district.routes[0].id);
+  </script>
+</body>
+</html>
