@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <link rel="icon" href="data:," />
-  <title>荻窪局 4区 取集ルート</title>
+  <title>荻窪局 5区 取集ルート</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/ogikubo-routes.js"></script>
@@ -62,19 +62,19 @@
 </head>
 <body>
   <header>
-    <h1>荻窪局 4区</h1>
+    <h1>荻窪局 5区</h1>
     <nav aria-label="区切替">
       <a href="ogikubo_2ku.html">2区</a>
       <a href="ogikubo_3ku.html">3区</a>
-      <a href="ogikubo_4ku.html" aria-current="page">4区</a>
-      <a href="ogikubo_5ku.html">5区</a>
+      <a href="ogikubo_4ku.html">4区</a>
+      <a href="ogikubo_5ku.html" aria-current="page">5区</a>
     </nav>
     <div class="route-controls" id="routeControls" aria-label="ルート切替"></div>
     <div class="meta" id="routeMeta"></div>
   </header>
   <main><div id="map"></div></main>
   <script>
-    const DISTRICT_ID = "4";
+    const DISTRICT_ID = "5";
     const district = window.OGIKUBO_ROUTES.districts[DISTRICT_ID];
     const map = L.map('map', { zoomControl: true });
     L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
