@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link rel="icon" href="data:," />
+  <title>葛飾新宿局 4区 取集ルート</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/katsushika-map.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/katsushika-shinjuku-routes.js"></script>
+</head>
+<body data-district="4">
+  <header>
+    <h1>葛飾新宿局 4区</h1>
+    <nav aria-label="区切替">
+      <a href="katsushika_shinjuku_2ku.html" data-district="2">2区</a>
+      <a href="katsushika_shinjuku_3ku.html" data-district="3">3区</a>
+      <a href="katsushika_shinjuku_4ku.html" data-district="4">4区</a>
+      <a href="katsushika_shinjuku_5ku.html" data-district="5">5区</a>
+    </nav>
+    <a class="back-link" href="index.html">一覧</a>
+    <div class="meta" id="routeMeta"></div>
+  </header>
+  <main><div id="map" aria-label="葛飾新宿局4区の郵便ポスト地図"></div></main>
+  <script src="assets/katsushika-map.js"></script>
+</body>
+</html>
