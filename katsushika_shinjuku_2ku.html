@@ -7,6 +7,7 @@
   <title>葛飾新宿局 2区 取集ルート</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
   <link rel="stylesheet" href="assets/katsushika-map.css" />
+  <link rel="stylesheet" href="assets/current-location.css" />
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script src="assets/katsushika-shinjuku-routes.js"></script>
 </head>
@@ -22,7 +23,8 @@
     <a class="back-link" href="index.html">一覧</a>
     <div class="meta" id="routeMeta"></div>
   </header>
-  <main><div id="map" aria-label="葛飾新宿局2区の郵便ポスト地図"></div></main>
+  <main><div id="map" role="region" aria-label="葛飾新宿局2区の郵便ポスト地図"></div></main>
+  <script src="assets/current-location.js"></script>
   <script src="assets/katsushika-map.js"></script>
 </body>
 </html>

@@ -6,7 +6,9 @@
   <link rel="icon" href="data:," />
   <title>荻窪局 4区 取集ルート</title>
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="assets/current-location.css" />
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="assets/current-location.js"></script>
   <script src="assets/ogikubo-routes.js"></script>
   <style>
     :root {
@@ -72,7 +74,7 @@
     <div class="route-controls" id="routeControls" aria-label="ルート切替"></div>
     <div class="meta" id="routeMeta"></div>
   </header>
-  <main><div id="map"></div></main>
+  <main><div id="map" role="region" aria-label="荻窪局4区の郵便ポスト地図"></div></main>
   <script>
     const DISTRICT_ID = "4";
     const district = window.OGIKUBO_ROUTES.districts[DISTRICT_ID];
@@ -144,6 +146,7 @@
       if (index === 0) button.classList.add('active');
     });
     draw(district.routes[0].id);
+    if (window.PostRootLocation) window.PostRootLocation.addTo(map);
   </script>
 </body>
 </html>

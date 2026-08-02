@@ -99,4 +99,8 @@
 
   map.fitBounds(latLngs, { padding: [30, 30] });
   metaElement.textContent = `${route.label} / ${route.points.length}地点 / 表 No.${district.sourceRows}`;
+
+  if (window.PostRootLocation) {
+    window.PostRootLocation.addTo(map);
+  }
 })();
