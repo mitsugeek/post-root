@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="調布郵便局の郵便差出箱取集ルートを、1区から9区まで順路・取集予定時刻つきで確認できる地図です。" />
+  <link rel="canonical" href="https://mitsugeek.github.io/post-root/chofu/" />
+  <meta property="og:type" content="website" />
+  <meta property="og:title" content="調布郵便局 取集ルート" />
+  <meta property="og:description" content="1〜9区・全167地点の順路と取集予定時刻を確認できる地図。" />
+  <meta property="og:url" content="https://mitsugeek.github.io/post-root/chofu/" />
+  <meta property="og:image" content="https://mitsugeek.github.io/post-root/chofu/og.png" />
+  <meta property="og:image:width" content="1731" />
+  <meta property="og:image:height" content="909" />
+  <meta property="og:image:alt" content="調布郵便局を中心に9色の取集ルートを描いたイラスト" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:title" content="調布郵便局 取集ルート" />
+  <meta name="twitter:description" content="1〜9区・全167地点の順路と取集予定時刻を確認できる地図。" />
+  <meta name="twitter:image" content="https://mitsugeek.github.io/post-root/chofu/og.png" />
+  <link rel="icon" href="data:," />
+  <title>調布郵便局 取集ルート</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css" />
+  <link rel="stylesheet" href="../assets/current-location.css" />
+  <link rel="stylesheet" href="assets/chofu-map.css" />
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js" defer></script>
+  <script src="assets/chofu-routes.js" defer></script>
+  <script src="../assets/current-location.js" defer></script>
+  <script src="assets/chofu-map.js" defer></script>
+</head>
+<body>
+  <header class="site-header">
+    <div class="brand-block">
+      <span class="eyebrow">POST-ROOT / CHOFU</span>
+      <h1>調布郵便局 取集ルート</h1>
+    </div>
+    <a class="back-link" href="../index.html">既存の一覧へ</a>
+    <nav class="route-tabs" aria-label="取集区切替">
+      <button type="button" data-route="all">全区</button>
+      <button type="button" data-route="1">1区</button>
+      <button type="button" data-route="2">2区</button>
+      <button type="button" data-route="3">3区</button>
+      <button type="button" data-route="4">4区</button>
+      <button type="button" data-route="5">5区</button>
+      <button type="button" data-route="6">6区</button>
+      <button type="button" data-route="7">7区</button>
+      <button type="button" data-route="8">8区</button>
+      <button type="button" data-route="9">9区</button>
+    </nav>
+    <div class="route-meta" id="routeMeta" aria-live="polite"></div>
+  </header>
+
+  <main class="workspace">
+    <aside class="route-panel" aria-label="立寄地点一覧">
+      <div class="panel-heading">
+        <div>
+          <p class="panel-kicker" id="panelKicker">1区</p>
+          <h2 id="panelTitle">立寄地点</h2>
+        </div>
+        <span class="point-count" id="pointCount"></span>
+      </div>
+      <p class="panel-note" id="panelNote"></p>
+      <ol class="route-list" id="routeList"></ol>
+    </aside>
+
+    <section class="map-shell" aria-label="取集ルート地図">
+      <div id="map"></div>
+      <p class="map-note">資料の立寄順を直線で結んでいます。道路ナビの経路ではありません。</p>
+      <noscript>地図の表示にはJavaScriptが必要です。</noscript>
+    </section>
+  </main>
+</body>
+</html>
