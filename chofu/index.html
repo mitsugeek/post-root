@@ -3,11 +3,11 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <meta name="description" content="調布郵便局の郵便差出箱取集ルートを、1区から9区まで順路・取集予定時刻つきで確認できる地図です。" />
+  <meta name="description" content="調布郵便局の郵便差出箱取集ルートを、1区から9区・特集便・補助便まで順路・取集予定時刻つきで確認できる地図です。" />
   <link rel="canonical" href="https://mitsugeek.github.io/post-root/chofu/" />
   <meta property="og:type" content="website" />
   <meta property="og:title" content="調布郵便局 取集ルート" />
-  <meta property="og:description" content="1〜9区・全167地点の順路と取集予定時刻を確認できる地図。" />
+  <meta property="og:description" content="1〜9区・特集便・補助便の順路と取集予定時刻を確認できる地図。" />
   <meta property="og:url" content="https://mitsugeek.github.io/post-root/chofu/" />
   <meta property="og:image" content="https://mitsugeek.github.io/post-root/chofu/og.png" />
   <meta property="og:image:width" content="1731" />
@@ -15,7 +15,7 @@
   <meta property="og:image:alt" content="調布郵便局を中心に9色の取集ルートを描いたイラスト" />
   <meta name="twitter:card" content="summary_large_image" />
   <meta name="twitter:title" content="調布郵便局 取集ルート" />
-  <meta name="twitter:description" content="1〜9区・全167地点の順路と取集予定時刻を確認できる地図。" />
+  <meta name="twitter:description" content="1〜9区・特集便・補助便の順路と取集予定時刻を確認できる地図。" />
   <meta name="twitter:image" content="https://mitsugeek.github.io/post-root/chofu/og.png" />
   <link rel="icon" href="data:," />
   <title>調布郵便局 取集ルート</title>
@@ -34,7 +34,7 @@
       <h1>調布郵便局 取集ルート</h1>
     </div>
     <a class="back-link" href="../index.html">既存の一覧へ</a>
-    <nav class="route-tabs" aria-label="取集区切替">
+    <nav class="route-tabs" aria-label="取集ルート切替">
       <button type="button" data-route="all">全区</button>
       <button type="button" data-route="1">1区</button>
       <button type="button" data-route="2">2区</button>
@@ -45,6 +45,8 @@
       <button type="button" data-route="7">7区</button>
       <button type="button" data-route="8">8区</button>
       <button type="button" data-route="9">9区</button>
+      <button type="button" data-route="special">特集便</button>
+      <button type="button" data-route="auxiliary">補助便</button>
     </nav>
     <div class="route-meta" id="routeMeta" aria-live="polite"></div>
   </header>

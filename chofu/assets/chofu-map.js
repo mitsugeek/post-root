@@ -24,6 +24,8 @@
   const routeLayer = L.layerGroup().addTo(map);
   const routeMarkers = new Map();
   const allPoints = Object.values(data.districts).flatMap((route) => route.points);
+  const serviceRoutes = data.serviceRoutes || {};
+  const serviceRouteGroups = data.serviceRouteGroups || {};
   const typeMeta = {
     "postbox": { label: "屋外ポスト", mark: "●" },
     "postal-office": { label: "郵便局", mark: "〒" },
@@ -78,7 +80,7 @@
       .join("")}</dl>`;
   }
 
-  function pointPopup(point, district) {
+  function pointPopup(point, routeLabel, sourceLabel, serviceRoute = null) {
     const matchedAddress = point.postmapAddress
       ? `<p class="secondary">Postmap登録住所: ${escapeHtml(point.postmapAddress)}</p>`
       : point.matchedAddress !== point.address
@@ -91,12 +93,18 @@
       : point.inactivePostmapUrl
         ? `<a href="${escapeHtml(point.inactivePostmapUrl)}" target="_blank" rel="noopener">Postmapの撤去記録</a>`
         : "";
+    const serviceDetails = serviceRoute
+      ? `<p>${escapeHtml(serviceRoute.groupLabel)}の平日運行: ${escapeHtml(serviceRoute.weekdayWindow.start)}–${escapeHtml(serviceRoute.weekdayWindow.end)}</p>
+        ${point.serviceNote ? `<p class="verification verification-service">${escapeHtml(point.serviceNote)}</p>` : ""}
+        <p class="secondary">区画調書記載: ${escapeHtml(point.serviceSourceAddress)}</p>`
+      : "";
     return `<div class="popup">
       <h3>${escapeHtml(point.name)}</h3>
       <p><span class="type-chip type-${escapeHtml(point.locationType)}">${escapeHtml(meta.label)}</span></p>
-      <p>${escapeHtml(district)}区 ${point.order}番 / 資料 No.${point.sourceRow}</p>
+      <p>${escapeHtml(routeLabel)} ${point.order}番 / ${escapeHtml(sourceLabel)}</p>
       <p>${escapeHtml(point.address)}</p>
       ${matchedAddress}
+      ${serviceDetails}
       ${scheduleMarkup(point.schedule)}
       ${verification}
       <p class="secondary">座標: ${escapeHtml(point.coordinateSource)}</p>
@@ -162,14 +170,14 @@
     return times?.length ? `平日 ${times.join(" / ")}` : "平日の時刻記載なし";
   }
 
-  function showPoint(point, district) {
-    const marker = routeMarkers.get(`${district}-${point.sourceRow}`);
+  function showPoint(point, routeKey) {
+    const marker = routeMarkers.get(`${routeKey}-${point.order}-${point.sourceRow}`);
     if (!marker) return;
     map.setView(marker.getLatLng(), 17, { animate: true });
     marker.openPopup();
   }
 
-  function renderRouteList(district, route) {
+  function renderRouteList(routeKey, route) {
     const fragment = document.createDocumentFragment();
     route.points.forEach((point) => {
       const item = document.createElement("li");
@@ -188,7 +196,7 @@
           <span class="stop-address">${escapeHtml(point.address.replace("東京都", ""))}</span>
           <span class="stop-times">${escapeHtml(weekdaySummary(point))}</span>
         </span>`;
-      button.addEventListener("click", () => showPoint(point, district));
+      button.addEventListener("click", () => showPoint(point, routeKey));
       item.append(button);
       fragment.append(item);
     });
@@ -210,6 +218,32 @@
         </span>
         <span class="overview-count">${route.points.length}地点</span>`;
       button.addEventListener("click", () => selectRoute(district));
+      item.append(button);
+      fragment.append(item);
+    });
+    routeList.replaceChildren(fragment);
+  }
+
+  function serviceRoutesFor(groupKey) {
+    const group = serviceRouteGroups[groupKey];
+    return group ? group.routeIds.map((routeId) => serviceRoutes[routeId]).filter(Boolean) : [];
+  }
+
+  function renderServiceOverviewList(groupKey) {
+    const fragment = document.createDocumentFragment();
+    serviceRoutesFor(groupKey).forEach((route) => {
+      const item = document.createElement("li");
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "overview-button";
+      button.style.setProperty("--route-color", route.color);
+      button.innerHTML = `<span class="route-swatch"></span>
+        <span>
+          <span class="overview-title">${escapeHtml(route.title)}</span>
+          <span class="overview-range">平日 ${escapeHtml(route.weekdayWindow.start)}–${escapeHtml(route.weekdayWindow.end)} / 区画調書 p.${route.sourcePage}</span>
+        </span>
+        <span class="overview-count">${route.points.length}立寄</span>`;
+      button.addEventListener("click", () => selectRoute(route.id));
       item.append(button);
       fragment.append(item);
     });
@@ -245,6 +279,40 @@
     fit([data.office, ...allPoints]);
   }
 
+  function renderServiceOverview(groupKey) {
+    const group = serviceRouteGroups[groupKey];
+    const routes = serviceRoutesFor(groupKey);
+    const points = routes.flatMap((route) => route.points);
+    const collectionUnits = routes.reduce((total, route) => total + route.collectionUnitCount, 0);
+
+    panelKicker.textContent = group.title;
+    panelTitle.textContent = "ルート一覧";
+    panelNote.textContent = `${group.description}便を選ぶと、区画調書の立寄順を確認できます。`;
+    pointCount.textContent = `${routes.length}ルート`;
+    routeMeta.textContent = `${group.title} / ${routes.length}ルート / 延べ${points.length}立寄 / ${collectionUnits}取扱`;
+
+    addOfficeMarker();
+    routes.forEach((route) => {
+      const path = [data.office, ...route.points, data.office].map((point) => [point.lat, point.lng]);
+      L.polyline(path, { color: route.color, weight: 3.5, opacity: 0.76 })
+        .bindTooltip(route.title, { sticky: true })
+        .addTo(routeLayer);
+      route.points.forEach((point) => {
+        L.circleMarker([point.lat, point.lng], {
+          radius: point.verification === "postmap-matched" ? 4 : 5,
+          color: point.verification === "postmap-matched" ? "#fff" : "#172033",
+          weight: point.verification === "postmap-matched" ? 1.5 : 2,
+          fillColor: route.color,
+          fillOpacity: point.verification === "postmap-matched" ? 1 : 0.45,
+        })
+          .bindTooltip(`${route.title} / ${point.order}. ${point.name}`, { sticky: true })
+          .addTo(routeLayer);
+      });
+    });
+    renderServiceOverviewList(groupKey);
+    fit([data.office, ...points]);
+  }
+
   function renderDistrict(district) {
     const route = data.districts[district];
     const path = [data.office, ...route.points, data.office].map((point) => [point.lat, point.lng]);
@@ -268,21 +336,64 @@
       const marker = L.marker(markerPosition(point, route.points), {
         icon: routeIcon(point, route.color),
       })
-        .bindPopup(pointPopup(point, district), { maxWidth: 345 })
+        .bindPopup(pointPopup(point, `${district}区`, `資料 No.${point.sourceRow}`), { maxWidth: 345 })
         .addTo(routeLayer);
-      routeMarkers.set(`${district}-${point.sourceRow}`, marker);
+      routeMarkers.set(`${district}-${point.order}-${point.sourceRow}`, marker);
     });
 
     renderRouteList(district, route);
     fit([data.office, ...route.points]);
   }
 
+  function renderServiceRoute(routeId) {
+    const route = serviceRoutes[routeId];
+    const path = [data.office, ...route.points, data.office].map((point) => [point.lat, point.lng]);
+    const matched = route.points.filter((point) => point.verification === "postmap-matched").length;
+    const unitLabel = route.collectionUnitCount === route.points.length
+      ? `${route.collectionUnitCount}取扱`
+      : `${route.collectionUnitCount}取扱（${route.points.length}立寄）`;
+
+    panelKicker.textContent = route.groupLabel;
+    panelTitle.textContent = route.title;
+    panelNote.textContent = `区画調書 p.${route.sourcePage}。平日配車表 ${route.weekdayWindow.start}–${route.weekdayWindow.end}、${route.distanceKm}km・所要${route.durationMinutes}分。地点を選ぶと通常便を含む予定時刻を表示します。`;
+    pointCount.textContent = `${route.points.length}地点`;
+    routeMeta.textContent = `${route.title} / ${unitLabel} / Postmap照合 ${matched}地点 / 区画調書 p.${route.sourcePage}`;
+
+    L.polyline(path, {
+      color: route.color,
+      weight: 4,
+      opacity: 0.84,
+      lineJoin: "round",
+    }).addTo(routeLayer);
+    addOfficeMarker();
+
+    route.points.forEach((point) => {
+      const marker = L.marker(markerPosition(point, route.points), {
+        icon: routeIcon(point, route.color),
+      })
+        .bindPopup(
+          pointPopup(point, route.title, `区画調書 p.${route.sourcePage} / 通常便資料 No.${point.sourceRow}`, route),
+          { maxWidth: 365 },
+        )
+        .addTo(routeLayer);
+      routeMarkers.set(`${route.id}-${point.order}-${point.sourceRow}`, marker);
+    });
+
+    renderRouteList(route.id, route);
+    fit([data.office, ...route.points]);
+  }
+
   function selectRoute(routeId, updateUrl = true) {
-    const selected = routeId === "all" || data.districts[routeId] ? routeId : "1";
+    const isServiceGroup = Boolean(serviceRouteGroups[routeId]);
+    const isServiceRoute = Boolean(serviceRoutes[routeId]);
+    const selected = routeId === "all" || data.districts[routeId] || isServiceGroup || isServiceRoute
+      ? routeId
+      : "1";
+    const activeTab = isServiceRoute ? serviceRoutes[selected].type : selected;
     routeLayer.clearLayers();
     routeMarkers.clear();
     tabs.forEach((tab) => {
-      if (tab.dataset.route === selected) {
+      if (tab.dataset.route === activeTab) {
         tab.setAttribute("aria-current", "page");
       } else {
         tab.removeAttribute("aria-current");
@@ -291,13 +402,23 @@
 
     if (selected === "all") {
       renderOverview();
+    } else if (serviceRouteGroups[selected]) {
+      renderServiceOverview(selected);
+    } else if (serviceRoutes[selected]) {
+      renderServiceRoute(selected);
     } else {
       renderDistrict(selected);
     }
 
     if (updateUrl) {
       const url = new URL(window.location.href);
-      url.searchParams.set("district", selected);
+      if (serviceRouteGroups[selected] || serviceRoutes[selected]) {
+        url.searchParams.delete("district");
+        url.searchParams.set("route", selected);
+      } else {
+        url.searchParams.delete("route");
+        url.searchParams.set("district", selected);
+      }
       history.replaceState(null, "", url);
     }
   }
@@ -315,6 +436,7 @@
     window.PostRootLocation.addTo(map);
   }
 
-  const initialRoute = new URLSearchParams(window.location.search).get("district") || "1";
+  const initialParams = new URLSearchParams(window.location.search);
+  const initialRoute = initialParams.get("route") || initialParams.get("district") || "1";
   selectRoute(initialRoute, false);
 })();

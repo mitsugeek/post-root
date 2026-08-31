@@ -502,6 +502,11 @@ h1 {
   color: #475569 !important;
 }
 
+.verification-service {
+  background: #ffedd5;
+  color: #9a3412 !important;
+}
+
 .schedule-grid {
   display: grid;
   grid-template-columns: auto 1fr;
