@@ -75,14 +75,21 @@
                 "12:30"
               ]
             },
-            "lat": 35.652771,
-            "lng": 139.537613,
+            "lat": 35.652981,
+            "lng": 139.537888,
             "matchedAddress": "東京都調布市下石原二丁目５７番",
             "query": "東京都調布市下石原2−57",
             "locationType": "postbox",
             "locationTypeLabel": "屋外ポスト",
-            "verification": "address-representative",
-            "coordinateSource": "国土地理院の住所代表点"
+            "verification": "postmap-matched",
+            "coordinateSource": "ポストマップ登録座標",
+            "postmapId": 34940,
+            "postmapTitle": "天理教本多摩分教会入口",
+            "postmapAddress": "東京都調布市下石原二丁目56-4",
+            "postmapUrl": "https://www.postmap.org/map/34940",
+            "postmapCheckDate": "2023-11-09",
+            "postmapIcon": 1,
+            "postboxModel": "130"
           },
           {
             "order": 3,
@@ -332,14 +339,21 @@
                 "12:55"
               ]
             },
-            "lat": 35.655136,
-            "lng": 139.528259,
+            "lat": 35.655274,
+            "lng": 139.528514,
             "matchedAddress": "東京都調布市上石原二丁目２１番",
             "query": "東京都調布市上石原2−21",
             "locationType": "postbox",
             "locationTypeLabel": "屋外ポスト",
-            "verification": "address-representative",
-            "coordinateSource": "国土地理院の住所代表点"
+            "verification": "postmap-matched",
+            "coordinateSource": "ポストマップ登録座標",
+            "postmapId": 167891,
+            "postmapTitle": "激辛ホルモンうたげ",
+            "postmapAddress": "東京都調布市上石原二丁目23-19",
+            "postmapUrl": "https://www.postmap.org/map/167891",
+            "postmapCheckDate": "2023-11-09",
+            "postmapIcon": 1,
+            "postboxModel": "130"
           },
           {
             "order": 11,
@@ -358,14 +372,21 @@
                 "12:55"
               ]
             },
-            "lat": 35.656284,
-            "lng": 139.519623,
+            "lat": 35.656331,
+            "lng": 139.519826,
             "matchedAddress": "東京都調布市飛田給三丁目１９番",
             "query": "東京都調布市飛田給3−19",
             "locationType": "postbox",
             "locationTypeLabel": "屋外ポスト",
-            "verification": "address-representative",
-            "coordinateSource": "国土地理院の住所代表点"
+            "verification": "postmap-matched",
+            "coordinateSource": "ポストマップ登録座標",
+            "postmapId": 1542152,
+            "postmapTitle": "コンフォートヒルⅡ前",
+            "postmapAddress": "東京都調布市飛田給三丁目6-37",
+            "postmapUrl": "https://www.postmap.org/map/1542152",
+            "postmapCheckDate": "2023-11-09",
+            "postmapIcon": 1,
+            "postboxModel": "130"
           },
           {
             "order": 12,
@@ -860,14 +881,21 @@
                 "12:50"
               ]
             },
-            "lat": 35.640442,
-            "lng": 139.549881,
+            "lat": 35.640127,
+            "lng": 139.549385,
             "matchedAddress": "東京都調布市染地二丁目８番",
             "query": "東京都調布市染地2−8",
             "locationType": "postbox",
             "locationTypeLabel": "屋外ポスト",
-            "verification": "address-representative",
-            "coordinateSource": "国土地理院の住所代表点"
+            "verification": "postmap-matched",
+            "coordinateSource": "ポストマップ登録座標",
+            "postmapId": 53508,
+            "postmapTitle": "そめちファミリークリニック前",
+            "postmapAddress": "東京都調布市染地二丁目57-6",
+            "postmapUrl": "https://www.postmap.org/map/53508",
+            "postmapCheckDate": "2026-01-22",
+            "postmapIcon": 1,
+            "postboxModel": "130"
           },
           {
             "order": 10,
@@ -5458,8 +5486,8 @@
     "verificationSource": "ポストマップ（投稿型データ）",
     "verificationDate": "2026-08-31",
     "verificationSummary": {
-      "postmapMatched": 145,
-      "addressRepresentative": 14,
+      "postmapMatched": 149,
+      "addressRepresentative": 10,
       "postmapConflict": 2,
       "smari": 6
     }
