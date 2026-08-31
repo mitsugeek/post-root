@@ -6,6 +6,7 @@
   const panelTitle = document.getElementById("panelTitle");
   const panelNote = document.getElementById("panelNote");
   const pointCount = document.getElementById("pointCount");
+  const verificationSummary = document.getElementById("verificationSummary");
   const routeList = document.getElementById("routeList");
   const tabs = [...document.querySelectorAll("[data-route]")];
 
@@ -23,6 +24,12 @@
   const routeLayer = L.layerGroup().addTo(map);
   const routeMarkers = new Map();
   const allPoints = Object.values(data.districts).flatMap((route) => route.points);
+  const typeMeta = {
+    "postbox": { label: "屋外ポスト", mark: "●" },
+    "postal-office": { label: "郵便局", mark: "〒" },
+    "convenience-indoor": { label: "店内ポスト", mark: "店" },
+    "smari": { label: "スマリ", mark: "S" },
+  };
 
   function escapeHtml(value) {
     return String(value ?? "").replace(/[&<>"']/g, (character) => ({
@@ -42,10 +49,13 @@
     return `https://www.google.com/maps/@?api=1&map_action=pano&viewpoint=${point.lat},${point.lng}`;
   }
 
-  function routeIcon(order, color) {
+  function routeIcon(point, color) {
+    const meta = typeMeta[point.locationType] || typeMeta.postbox;
     return L.divIcon({
       className: "route-badge-icon",
-      html: `<div class="badge" style="--route-color:${color}">${order}</div>`,
+      html: `<div class="badge badge-${escapeHtml(point.verification)}" style="--route-color:${color}">
+        <span>${point.order}</span><i title="${escapeHtml(meta.label)}">${escapeHtml(meta.mark)}</i>
+      </div>`,
       iconSize: [30, 30],
       iconAnchor: [15, 15],
       popupAnchor: [0, -17],
@@ -69,21 +79,47 @@
   }
 
   function pointPopup(point, district) {
-    const matchedAddress = point.matchedAddress !== point.address
-      ? `<p class="secondary">地図上の登録地点: ${escapeHtml(point.matchedAddress)}</p>`
-      : "";
+    const matchedAddress = point.postmapAddress
+      ? `<p class="secondary">Postmap登録住所: ${escapeHtml(point.postmapAddress)}</p>`
+      : point.matchedAddress !== point.address
+        ? `<p class="secondary">住所検索結果: ${escapeHtml(point.matchedAddress)}</p>`
+        : "";
+    const meta = typeMeta[point.locationType] || typeMeta.postbox;
+    const verification = verificationMarkup(point);
+    const postmapLink = point.postmapUrl
+      ? `<a href="${escapeHtml(point.postmapUrl)}" target="_blank" rel="noopener">Postmap登録</a>`
+      : point.inactivePostmapUrl
+        ? `<a href="${escapeHtml(point.inactivePostmapUrl)}" target="_blank" rel="noopener">Postmapの撤去記録</a>`
+        : "";
     return `<div class="popup">
       <h3>${escapeHtml(point.name)}</h3>
+      <p><span class="type-chip type-${escapeHtml(point.locationType)}">${escapeHtml(meta.label)}</span></p>
       <p>${escapeHtml(district)}区 ${point.order}番 / 資料 No.${point.sourceRow}</p>
       <p>${escapeHtml(point.address)}</p>
       ${matchedAddress}
       ${scheduleMarkup(point.schedule)}
-      <p class="secondary">座標: ${escapeHtml(data.coordinateSource)}</p>
+      ${verification}
+      <p class="secondary">座標: ${escapeHtml(point.coordinateSource)}</p>
       <div class="popup-links">
         <a href="${mapsUrl(point)}" target="_blank" rel="noopener">Google Maps</a>
         <a href="${streetViewUrl(point)}" target="_blank" rel="noopener">Street View</a>
+        ${postmapLink}
       </div>
     </div>`;
+  }
+
+  function verificationMarkup(point) {
+    if (point.verification === "postmap-matched") {
+      const checked = point.postmapCheckDate ? `（確認日 ${escapeHtml(point.postmapCheckDate)}）` : "";
+      return `<p class="verification verification-ok">Postmapの現行登録と照合${checked}</p>`;
+    }
+    if (point.verification === "postmap-conflict") {
+      return '<p class="verification verification-warning">資料には記載がありますが、Postmapでは撤去扱いです。</p>';
+    }
+    if (point.verification === "source-only") {
+      return '<p class="verification verification-neutral">スマリは郵便ポストではありません。資料の住所代表点です。</p>';
+    }
+    return '<p class="verification verification-neutral">Postmapで地点を特定できず、資料の住所代表点を表示しています。</p>';
   }
 
   function officePopup() {
@@ -145,6 +181,10 @@
       button.innerHTML = `<span class="stop-number">${point.order}</span>
         <span class="stop-copy">
           <span class="stop-name">${escapeHtml(point.name)}</span>
+          <span class="stop-tags">
+            <span class="type-chip type-${escapeHtml(point.locationType)}">${escapeHtml(point.locationTypeLabel)}</span>
+            <span class="status-dot status-${escapeHtml(point.verification)}">${point.verification === "postmap-matched" ? "照合済み" : "要確認"}</span>
+          </span>
           <span class="stop-address">${escapeHtml(point.address.replace("東京都", ""))}</span>
           <span class="stop-times">${escapeHtml(weekdaySummary(point))}</span>
         </span>`;
@@ -181,7 +221,7 @@
     panelTitle.textContent = "ルート一覧";
     panelNote.textContent = "色分けした1〜9区を表示しています。区を選ぶと立寄順と予定時刻を確認できます。";
     pointCount.textContent = `${allPoints.length}地点`;
-    routeMeta.textContent = `全9区 / ${allPoints.length}地点 / 資料更新 ${data.updated}`;
+    routeMeta.textContent = `全9区 / ${allPoints.length}地点 / Postmap照合 ${data.verificationSummary.postmapMatched}地点`;
 
     addOfficeMarker();
     Object.values(data.districts).forEach((route) => {
@@ -191,11 +231,11 @@
         .addTo(routeLayer);
       route.points.forEach((point) => {
         L.circleMarker([point.lat, point.lng], {
-          radius: 4,
-          color: "#fff",
-          weight: 1.5,
+          radius: point.verification === "postmap-matched" ? 4 : 5,
+          color: point.verification === "postmap-matched" ? "#fff" : "#172033",
+          weight: point.verification === "postmap-matched" ? 1.5 : 2,
           fillColor: route.color,
-          fillOpacity: 1,
+          fillOpacity: point.verification === "postmap-matched" ? 1 : 0.45,
         })
           .bindTooltip(`${route.title} / ${point.order}. ${point.name}`, { sticky: true })
           .addTo(routeLayer);
@@ -213,7 +253,8 @@
     panelTitle.textContent = "立寄地点";
     panelNote.textContent = `資料 No.${route.sourceRows}。地点を選ぶと地図上のマーカーと曜日別の予定時刻を表示します。`;
     pointCount.textContent = `${route.points.length}地点`;
-    routeMeta.textContent = `${district}区 / ${route.points.length}地点 / 資料 No.${route.sourceRows} / 更新 ${data.updated}`;
+    const matched = route.points.filter((point) => point.verification === "postmap-matched").length;
+    routeMeta.textContent = `${district}区 / ${route.points.length}地点 / Postmap照合 ${matched}地点 / 資料 No.${route.sourceRows}`;
 
     L.polyline(path, {
       color: route.color,
@@ -225,7 +266,7 @@
 
     route.points.forEach((point) => {
       const marker = L.marker(markerPosition(point, route.points), {
-        icon: routeIcon(point.order, route.color),
+        icon: routeIcon(point, route.color),
       })
         .bindPopup(pointPopup(point, district), { maxWidth: 345 })
         .addTo(routeLayer);
@@ -264,6 +305,11 @@
   tabs.forEach((tab) => {
     tab.addEventListener("click", () => selectRoute(tab.dataset.route));
   });
+
+  verificationSummary.innerHTML = `<span class="summary-item summary-ok">Postmap照合 ${data.verificationSummary.postmapMatched}</span>
+    <span class="summary-item summary-neutral">住所代表点 ${data.verificationSummary.addressRepresentative}</span>
+    <span class="summary-item summary-warning">撤去扱いと相違 ${data.verificationSummary.postmapConflict}</span>
+    <span class="summary-item summary-smari">スマリ ${data.verificationSummary.smari}</span>`;
 
   if (window.PostRootLocation) {
     window.PostRootLocation.addTo(map);

@@ -181,6 +181,50 @@ h1 {
   line-height: 1.55;
 }
 
+.verification-summary {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 5px;
+  margin: 0 0 14px;
+}
+
+.summary-item,
+.type-chip,
+.status-dot {
+  display: inline-flex;
+  align-items: center;
+  min-height: 21px;
+  padding: 2px 7px;
+  border-radius: 999px;
+  font-size: 10px;
+  font-weight: 800;
+  line-height: 1.2;
+}
+
+.summary-ok,
+.status-postmap-matched {
+  background: #dcfce7;
+  color: #166534;
+}
+
+.summary-neutral,
+.status-address-representative,
+.status-source-only {
+  background: #e2e8f0;
+  color: #475569;
+}
+
+.summary-warning,
+.status-postmap-conflict {
+  background: #ffedd5;
+  color: #9a3412;
+}
+
+.summary-smari {
+  background: #ede9fe;
+  color: #6d28d9;
+}
+
 .route-list {
   display: grid;
   gap: 8px;
@@ -243,6 +287,37 @@ h1 {
   line-height: 1.35;
   text-overflow: ellipsis;
   white-space: nowrap;
+}
+
+.stop-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  margin-top: 5px;
+}
+
+.type-chip {
+  border: 1px solid #cbd5e1;
+  background: #fff;
+  color: #334155;
+}
+
+.type-postal-office {
+  border-color: #fecaca;
+  background: #fff1f2;
+  color: #9f1239;
+}
+
+.type-convenience-indoor {
+  border-color: #bae6fd;
+  background: #f0f9ff;
+  color: #075985;
+}
+
+.type-smari {
+  border-color: #ddd6fe;
+  background: #f5f3ff;
+  color: #6d28d9;
 }
 
 .stop-address,
@@ -334,6 +409,7 @@ h1 {
 }
 
 .route-badge-icon .badge {
+  position: relative;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -346,6 +422,30 @@ h1 {
   font-size: 12px;
   font-weight: 900;
   box-shadow: 0 2px 8px rgba(24, 34, 55, 0.28);
+}
+
+.route-badge-icon .badge-postmap-conflict,
+.route-badge-icon .badge-address-representative,
+.route-badge-icon .badge-source-only {
+  border-style: dashed;
+  background: #f8fafc;
+}
+
+.route-badge-icon .badge i {
+  position: absolute;
+  right: -5px;
+  bottom: -5px;
+  display: grid;
+  place-items: center;
+  width: 16px;
+  height: 16px;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  background: #172033;
+  color: #fff;
+  font-size: 8px;
+  font-style: normal;
+  line-height: 1;
 }
 
 .office-icon .office-badge {
@@ -378,6 +478,28 @@ h1 {
 
 .popup .secondary {
   color: var(--muted);
+}
+
+.popup .verification {
+  margin-top: 8px;
+  padding: 7px 8px;
+  border-radius: 7px;
+  font-weight: 750;
+}
+
+.verification-ok {
+  background: #dcfce7;
+  color: #166534 !important;
+}
+
+.verification-warning {
+  background: #ffedd5;
+  color: #9a3412 !important;
+}
+
+.verification-neutral {
+  background: #e2e8f0;
+  color: #475569 !important;
 }
 
 .schedule-grid {
