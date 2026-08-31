@@ -1288,14 +1288,21 @@
                 "12:25"
               ]
             },
-            "lat": 35.652767,
-            "lng": 139.566254,
+            "lat": 35.653509,
+            "lng": 139.566849,
             "matchedAddress": "東京都調布市菊野台二丁目１８番",
             "query": "東京都調布市菊野台2−18",
             "locationType": "postbox",
             "locationTypeLabel": "屋外ポスト",
-            "verification": "address-representative",
-            "coordinateSource": "国土地理院の住所代表点"
+            "verification": "postmap-matched",
+            "coordinateSource": "ポストマップ登録座標",
+            "postmapId": 12383,
+            "postmapTitle": "柴崎駅前郵便局の前",
+            "postmapAddress": "東京都調布市菊野台二丁目21-9",
+            "postmapUrl": "https://www.postmap.org/map/12383",
+            "postmapCheckDate": "2026-08-30",
+            "postmapIcon": 1,
+            "postboxModel": "130"
           },
           {
             "order": 4,
@@ -5486,8 +5493,8 @@
     "verificationSource": "ポストマップ（投稿型データ）",
     "verificationDate": "2026-08-31",
     "verificationSummary": {
-      "postmapMatched": 149,
-      "addressRepresentative": 10,
+      "postmapMatched": 150,
+      "addressRepresentative": 9,
       "postmapConflict": 2,
       "smari": 6
     }
